@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 
 {% block post %}
-    <style type="text/css">
+     <style type="text/css">
         .post_block {
 
         }
@@ -15,22 +15,25 @@
         }
     </style>
     <div class="post_block">
-        <div style="display: flex; justify-content: center">
-            <img src="/media/{{ post.image }}" alt="" style="width: 300px;">
-        </div>
+        <img src="media/{{ post.image }}" alt="" style="width: 300px">
         <h1>{{ post.title }}</h1>
         <h5>{{ post.description }}</h5>
         <p>{{ post.date }}</p>
         <p>{{ post.stars }}</p>
         <p>{{ post.type }}</p>
     </div>
+    <form action="/posts/{{ post.id }}/" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <input type="submit" value="отправить комментарий">
+    </form>
     <div class="comments">
         {% for comment in comments %}
-            <div class="comment_block">
-                <h3>Author: {{ comment.author }}</h3>
-                <p>{{ comment.text }}</p>
-                <p>{{ comment.created_date }}</p>
-            </div>
+        <div class="comment_block">
+            <h3>Author: {{ comment.author }}</h3>
+            <p>{{ comment.text }}</p>
+            <p>{{ comment.created_date }}</p>
+        </div>
         {% endfor %}
     </div>
 {% endblock %}
