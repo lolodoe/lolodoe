@@ -4,13 +4,16 @@ from django.shortcuts import render, redirect
 from posts.forms import PostForm, Commentform
 from posts.models import Post, Comment
 
+def get_user_from_request(request):
+    return request.user if not request.user.is_anonymous else None
 
 def main(request):
     if request.method == 'GET':
         posts = Post.objects.all()
 
         data = {
-            'posts': posts
+            'posts': posts,
+            'user': get_user_from_request(request)
         }
 
         return render(request, 'posts.html', context=data)
@@ -89,6 +92,29 @@ def creat_comment(request):
         else:
             return render(request, 'create_post.html', context={
                 'post_form': form
+            })
+
+
+def edit(request, id):
+    if request.method == 'GET':
+        return render(request, 'edit.html', context={
+            'post_form': PostForm,
+            'id': id
+        })
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = Post.objects.get(id=id)
+            post.title=form.cleaned_data.get('title')
+            post.description=form.cleaned_data.get('description')
+            post.stars=form.cleaned_data.get('stars')
+            post.type=form.cleaned_data.get('type')
+            post.save()
+            return redirect('/')
+        else:
+            return render(request, 'edit.html', context={
+                'post_form': form,
+                'id': id
             })
 
 
