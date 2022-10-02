@@ -22,11 +22,13 @@
         <p>{{ post.stars }}</p>
         <p>{{ post.type }}</p>
     </div>
-    <form action="/posts/{{ post.id }}/" method="post">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <input type="submit" value="отправить комментарий">
-    </form>
+    {% if user %}
+        <form action="/posts/{{ post.id }}/" method="post">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <input type="submit" value="отправить комментарий">
+        </form>
+    {% endif %}
     <div class="comments">
         {% for comment in comments %}
         <div class="comment_block">

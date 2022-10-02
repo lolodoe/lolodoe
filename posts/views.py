@@ -25,6 +25,7 @@ def post_detail(request, id):
         comments = Comment.objects.filter(post=post)
 
         data = {
+            'user': get_user_from_request(request),
             'comment_form': Commentform,
             'post': post,
             'comments': comments
@@ -55,9 +56,12 @@ def post_detail(request, id):
 
 def create_post(request):
     if request.method == 'GET':
-        return render(request, 'create_post.html', context={
-            'post_form': PostForm
-        })
+        if get_user_from_request(request):
+            return render(request, 'create_post.html', context={
+                'post_form': PostForm
+            })
+        else:
+            return redirect('/')
 
     if request.method == "POST":
         form = PostForm(request.POST)
