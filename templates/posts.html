@@ -13,9 +13,17 @@
                 <h5>{{ post.description }}</h5>
                 <p>Stars: {{ post.stars }}</p>
                 <p>Type: {{ post.type }}</p>
-                <a href="/posts/{{ post.id }}/">More</a>
+                <a href="/posts/{{ post.id }}detail/">More</a>
                 <div class="edit_post"><a href="posts/{{ post.id }}/edit"><button>Изменить пост</button></a></div>
             </div>
         {% endfor %}
+    </div>
+    <div class="pagination">
+    {% for page in pages %}
+        <a href="/?page={{ page }}">
+            <button>{{ page }}</button>
+        </a>
+    {% endfor %}
+
     </div>
 {% endblock %}
