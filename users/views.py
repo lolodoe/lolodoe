@@ -1,56 +1,127 @@
-from django.shortcuts import render
-from users.forms import RegisterForm, LoginForm, SetPassForm
+# from django.shortcuts import render
+# from users.forms import RegisterForm, LoginForm, SetPassForm
+# from django.contrib.auth.models import User
+# from django.shortcuts import redirect
+# from django.contrib.auth import authenticate, login, logout
+# from posts.views import get_user_from_request
+# from django.views import View
+# from django.views.generic import ListView, CreateView, DetailView
+#
+#
+# class RegisterView(ListView, CreateView):
+#     template_name = 'users/register.html'
+#     form_class = RegisterForm
+#
+#     # if request.method == "GET":
+#     #     return render(request, "users/register.html", context={'form': RegisterForm})
+#     #
+#     # if request.method == "POST":
+#     #     form = RegisterForm(request.POST)
+#     #     if form.is_valid():
+#     #         User.objects.create_user(
+#     #             username=form.cleaned_data.get('username'),
+#     #             email=form.cleaned_data.get('email'),
+#     #             password=form.cleaned_data.get('password'),
+#     #             first_name=form.cleaned_data.get('first_name'),
+#     #             last_name=form.cleaned_data.get('last_name')
+#     #         )
+#     #         return redirect('/users/login/')
+#     # else:
+#     #     return render(request, 'users/register.html', context={'form': form})
+#
+#
+# def set_password(request, id):
+#     if request.method == 'GET':
+#         return render(request, 'users/set_password.html', context={
+#             'pers': SetPassForm,
+#             'id': id
+#         })
+#     elif request.method == 'POST':
+#         form = SetPassForm(request.POST)
+#         user = User.objects.get(id=id)
+#         if form.is_valid():
+#             user.set_password(form.cleaned_data.get('password'))
+#             user.save()
+#             return redirect('/')
+#         else:
+#             return render(request, 'users/set_password.html', context={
+#                 'pers': SetPassForm,
+#                 'id': id
+#             })
+#
+#
+# def login_view(request):
+#     if request.method == "GET":
+#         return render(request, 'users/logiin.html', context={'form': LoginForm})
+#
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         if form.is_valid():
+#             user = authenticate(
+#                 username=form.cleaned_data.get('username'),
+#                 password=form.cleaned_data.get('password')
+#             )
+#             if user:
+#                 login(request, user)
+#                 return redirect('/')
+#         else:
+#             return render(request, 'users/logiin.html', context={'form': form})
+#
+#
+# def logout_view(request):
+#     if request.method == "GET":
+#         logout(request)
+#         return redirect('/')
+#
+#
+# def personal_info(request):
+#     if request.method == 'GET':
+#         if get_user_from_request(request):
+#             return render(request, 'users/personal_info.html', context={'user': request.user})
+#         else:
+#             return redirect('/')
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout
+
 from posts.views import get_user_from_request
-# Create your views here.
+from users.forms import RegisterForm, LoginForm, SetPassForm
+from django.views.generic import ListView, View, CreateView, DetailView
 
 
-def register_view(request, form=None):
-    if request.method == "GET":
-        return render(request, "users/register.html", context={'form': RegisterForm})
+class RegisterView(ListView, CreateView):
+    template_name = 'users/register.html'
+    form_class = RegisterForm
 
-    if request.method == "POST":
-        form = RegisterForm(request.POST)
+    def get(self, request, *args):
+        return render(request, self.template_name, context={
+            'form': self.form_class
+        })
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
         if form.is_valid():
             User.objects.create_user(
                 username=form.cleaned_data.get('username'),
-                email=form.cleaned_data.get('email'),
                 password=form.cleaned_data.get('password'),
-                first_name=form.cleaned_data.get('first_name'),
-                last_name=form.cleaned_data.get('last_name')
+                email=form.cleaned_data.get('email'),
+                is_active=not False
             )
             return redirect('/users/login/')
-    else:
-        return render(request, 'users/register.html', context={'form': form})
-
-
-def set_password(request, id):
-    if request.method == 'GET':
-        return render(request, 'users/set_password.html', context={
-            'pers': SetPassForm,
-            'id': id
-        })
-    elif request.method == 'POST':
-        form = SetPassForm(request.POST)
-        user = User.objects.get(id=id)
-        if form.is_valid():
-            user.set_password(form.cleaned_data.get('password'))
-            user.save()
-            return redirect('/')
         else:
-            return render(request, 'users/set_password.html', context={
-                'pers': SetPassForm,
-                'id': id
+            return render(request, self.template_name, context={
+                'form': form
             })
 
 
-def login_view(request):
-    if request.method == "GET":
-        return render(request, 'users/logiin.html', context={'form': LoginForm})
+class LoginView(ListView, CreateView):
+    template_name = 'users/login.html'
+    form_class = LoginForm
 
-    if request.method == 'POST':
+    def get(self, request, *args):
+        return render(request, self.template_name, context={'form': self.form_class})
+
+    def post(self, request, *args, **kwargs):
         form = LoginForm(request.POST)
         if form.is_valid():
             user = authenticate(
@@ -61,18 +132,44 @@ def login_view(request):
                 login(request, user)
                 return redirect('/')
         else:
-            return render(request, 'users/logiin.html', context={'form': form})
+            return render(request, self.template_name, context={'form': form})
 
 
-def logout_view(request):
-    if request.method == "GET":
+class LogoutView(ListView):
+    def get(self, request, *args):
         logout(request)
         return redirect('/')
 
 
-def personal_info(request):
-    if request.method == 'GET':
+class PersonalView(ListView):
+    template_name = 'users/personal_info.html'
+
+    def get(self, request, **kwargs):
         if get_user_from_request(request):
-            return render(request, 'users/personal_info.html', context={'user': request.user})
+            return render(request, self.template_name, context={'user': request.user})
         else:
             return redirect('/')
+
+
+class ChangePass(ListView, CreateView):
+    template_name = 'users/set_password.html'
+    form_class = SetPassForm
+    queryset = User.objects.all()
+    # def get(self, pk, request, *args, **kwargs):
+    #     return render(request, self.template_name, context={
+    #         'form': self.form_class,
+    #         'pk': pk
+    #     })
+
+    def post(self, pk, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        instance = get_object_or_404(self.queryset, pk=pk)
+        if form.is_valid():
+            instance.set_password(form.cleaned_data.get('password'))
+            instance.save()
+            return redirect('/')
+        else:
+            return render(request, self.template_name, context={
+                'form': self.form_class,
+                'pk': pk
+            })
