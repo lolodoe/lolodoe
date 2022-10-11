@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Post</title>
+    <title>Edit post</title>
 </head>
 <body>
-    <form action="/posts/{{ id }}/edit/" method="post">
+    <form action="/posts/{{ pk }}/edit/" method="post">
         {% csrf_token %}
-        {{ post_form.as_p }}
-        <input type="submit" value="создать пост">
+        {{ post_form.as_ul }}
+        <input type="submit" value="edit_post">
     </form>
 </body>
 </html>
